@@ -317,7 +317,7 @@ main(
                         time_t              beforeTimeAdj = STimeRangeJustifyTime(beforeTime, justify, false);
                         
                         while ( N > 0 ) {
-                            STimeRangeRef   nextBlock = SScheduleGetNextOpenBlockBefore(theSchedule, beforeTimeAdj);
+                            STimeRangeRef   nextBlock = SScheduleGetNextOpenBlockBeforeTime(theSchedule, beforeTimeAdj);
                             
                             if ( ! nextBlock ) break;
                             //

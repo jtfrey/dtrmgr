@@ -446,18 +446,8 @@ SScheduleGetBlockCount(
 
 //
 
-const char*
-SScheduleGetLastErrorMessage(
-    SScheduleRef    aSchedule
-)
-{
-    return aSchedule->lastErrorMessage;
-}
-
-//
-
 STimeRangeRef
-SScheduleGetBlock(
+SScheduleGetBlockAtIndex(
     SScheduleRef    aSchedule,
     unsigned int    index
 )
@@ -469,6 +459,16 @@ SScheduleGetBlock(
         return block->period;
     }
     return NULL;
+}
+
+//
+
+const char*
+SScheduleGetLastErrorMessage(
+    SScheduleRef    aSchedule
+)
+{
+    return aSchedule->lastErrorMessage;
 }
 
 //
@@ -537,7 +537,7 @@ SScheduleGetNextOpenBlock(
 //
 
 STimeRangeRef
-SScheduleGetNextOpenBlockBefore(
+SScheduleGetNextOpenBlockBeforeTime(
     SScheduleRef    aSchedule,
     time_t          beforeTime
 )

@@ -1,17 +1,18 @@
 /*
  *  STimeRange
+ *
  *  Represent a range of seconds relative to the Unix epoch
  *
  */
 
 #include "STimeRange.h"
 
-/**/
+//
 
 const char *__STimeRangeDateTimeFormat = "%Y%m%dT%H%M%S%z";
 const size_t __STimeRangeDateTimeFormatMaxOutLen = 4 + 2 + 2 + 1 + 2 + 2 + 2 + 5 + 1;
 
-/**/
+//
 
 time_t
 STimeRangeJustifyTime(
@@ -21,7 +22,7 @@ STimeRangeJustifyTime(
 )
 {
     struct tm               dateTimeComponents;
-    
+
     if ( localtime_r(&theTime, &dateTimeComponents) ) {
         dateTimeComponents.tm_isdst = -1;
         if ( roundUp ) {
@@ -49,7 +50,15 @@ STimeRangeJustifyTime(
     return 0;
 }
 
-/**/
+//
+
+const char* const STimeRangeParseFormats[] = {
+        "%Y%m%dT%H%M%S%z",
+        "%Y%m%dT%H%M%S",
+        "%Y%m%dT%H%M",
+        "%Y%m%d",
+        NULL
+    };
 
 bool
 STimeRangeParseDateAndTime(
@@ -60,7 +69,7 @@ STimeRangeParseDateAndTime(
     char        *endptr;
     struct tm   dateTimeComponents;
     bool        okay = false;
-    
+
     if ( strcasecmp(dateTimeStr, "now") == 0 ) {
         if ( outTimestamp ) *outTimestamp = time(NULL);
         return true;
@@ -77,16 +86,21 @@ STimeRangeParseDateAndTime(
         if ( outTimestamp ) *outTimestamp = STimeRangeJustifyTime(time(NULL) + 86400, kSTimeRangeJustifyTimeToDays, false);
         return true;
     }
-    
-    endptr = strptime(dateTimeStr, __STimeRangeDateTimeFormat, &dateTimeComponents);
-    if ( endptr <= dateTimeStr ) {
-        if ( outTimestamp ) *outTimestamp = mktime(&dateTimeComponents);
-        return true;
+
+    const char* const   *formats = STimeRangeParseFormats;
+
+    while ( *formats ) {
+        endptr = strptime(dateTimeStr, __STimeRangeDateTimeFormat, &dateTimeComponents);
+        if ( endptr <= dateTimeStr ) {
+            if ( outTimestamp ) *outTimestamp = mktime(&dateTimeComponents);
+            return true;
+        }
+        formats++;
     }
     return false;
 }
 
-/**/
+//
 
 enum {
     kSTimeRangeIsStatic         = 1 << 0,
@@ -115,7 +129,7 @@ typedef struct STimeRange {
     const char  *cstr;
 } STimeRange;
 
-/**/
+//
 
 const STimeRange __STimeRangeInvalid = {
                             .refcount = 1,
@@ -135,7 +149,7 @@ const STimeRange __STimeRangeInfinite = {
                         };
 const STimeRangeRef STimeRangeInfinite = (STimeRangeRef)&__STimeRangeInfinite;
 
-/**/
+//
 
 #ifndef STIMERANGE_QUICKSTORE_CAPACITY
 #define STIMERANGE_QUICKSTORE_CAPACITY 32
@@ -191,7 +205,7 @@ __STimeRangeQuickStoreDealloc(
     }
 }
 
-/**/
+//
 
 STimeRange*
 __STimeRangeAlloc(void)
@@ -209,7 +223,7 @@ __STimeRangeAlloc(void)
     return newRange;
 }
 
-/**/
+//
 
 void
 __STimeRangeDealloc(
@@ -226,7 +240,7 @@ __STimeRangeDealloc(
     }
 }
 
-/**/
+//
 
 const char*
 __STimeRangeGetCString(
@@ -266,7 +280,7 @@ __STimeRangeGetCString(
     return ( aTimeRange->cstr ? aTimeRange->cstr : "" );
 }
 
-/**/
+//
 
 void
 __STimeRangeDebug(
@@ -305,7 +319,7 @@ __STimeRangeDebug(
     }
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeCreate(
@@ -424,7 +438,7 @@ STimeRangeCreateWithString(
     return newRange;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeCopy(
@@ -442,7 +456,7 @@ STimeRangeCopy(
     return (STimeRangeRef)newRange;
 }
 
-/**/
+//
 
 void
 STimeRangeRelease(
@@ -469,7 +483,7 @@ STimeRangeRetain(
     return aTimeRange;
 }
 
-/**/
+//
 
 bool
 STimeRangeIsValid(
@@ -527,7 +541,7 @@ STimeRangeGetCString(
     return __STimeRangeGetCString((STimeRange*)aTimeRange);
 }
 
-/**/
+//
 
 bool
 STimeRangeContainsTime(
@@ -541,7 +555,7 @@ STimeRangeContainsTime(
     return true;
 }
 
-/**/
+//
 
 bool
 STimeRangeIsFullyBounded(
@@ -552,7 +566,7 @@ STimeRangeIsFullyBounded(
     return ( (aTimeRange->options & kSTimeRangeHasLowerBound) && (aTimeRange->options & kSTimeRangeHasUpperBound) ) ? true : false;
 }
 
-/**/
+//
 
 bool
 STimeRangeGetDuration(
@@ -568,7 +582,7 @@ STimeRangeGetDuration(
     return false;
 }
 
-/**/
+//
 
 bool
 STimeRangeIsEqual(
@@ -683,7 +697,7 @@ STimeRangeIsContiguous(
     return false;
 }
 
-/**/
+//
 
 bool
 STimeRangeDoesTimePrecedeRange(
@@ -709,7 +723,7 @@ STimeRangeDoesTimeFollowRange(
     return false;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeIntersection(
@@ -775,7 +789,7 @@ STimeRangeIntersection(
     return outRange;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeUnion(
@@ -825,7 +839,7 @@ STimeRangeUnion(
     return outRange;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeJoin(
@@ -875,7 +889,7 @@ STimeRangeJoin(
     return outRange;
 }
 
-/**/
+//
 
 int
 STimeRangeCmp(
@@ -928,7 +942,7 @@ STimeRangeCmp(
     return 0;
 }
 
-/**/
+//
 
 int
 STimeRangeRightCmpToTime(
@@ -958,32 +972,35 @@ STimeRangeLeftCmpToTime(
     return -1;
 }
 
-/**/
+//
 
-bool
-STimeRangeClipToTimeRange(
+STimeRangeRef
+STimeRangeCreateByClippingToTimeRange(
     STimeRangeRef   clipThis,
     STimeRangeRef   toThis
 )
 {
-    STimeRange      *CLIPTHIS = (STimeRange*)clipThis;
+    // Default to the invalid range, e.g. if the two don't overlap:
     STimeRangeRef   outRange = STimeRangeInvalid;
 
     if ( STimeRangeDoesIntersect(clipThis, toThis) ) {
         time_t      start, end;
         bool        isStartSet = false, isEndSet = false;
-
+        
+        outRange = STimeRangeCopy(clipThis);
+        if ( ! outRange ) return outRange;
+        
         /* find maximum start time */
-        if ( (clipThis->options & kSTimeRangeHasLowerBound) ) {
+        if ( (outRange->options & kSTimeRangeHasLowerBound) ) {
             if ( (toThis->options & kSTimeRangeHasLowerBound) ) {
-                if ( clipThis->start <= toThis->start ) {
+                if ( outRange->start <= toThis->start ) {
                     start = toThis->start;
                 } else {
-                    start = clipThis->start;
+                    start = outRange->start;
                 }
                 isStartSet = true;
             } else {
-                start = clipThis->start;
+                start = outRange->start;
                 isStartSet = true;
             }
         } else if ( (toThis->options & kSTimeRangeHasLowerBound) ) {
@@ -992,16 +1009,16 @@ STimeRangeClipToTimeRange(
         }
 
         /* find minimum end time */
-        if ( (clipThis->options & kSTimeRangeHasUpperBound) ) {
+        if ( (outRange->options & kSTimeRangeHasUpperBound) ) {
             if ( (toThis->options & kSTimeRangeHasUpperBound) ) {
-                if ( clipThis->end <= toThis->end ) {
-                    end = clipThis->end;
+                if ( outRange->end <= toThis->end ) {
+                    end = outRange->end;
                 } else {
                     end = toThis->end;
                 }
                 isEndSet = true;
             } else {
-                end = clipThis->end;
+                end = outRange->end;
                 isEndSet = true;
             }
         } else if ( (toThis->options & kSTimeRangeHasUpperBound) ) {
@@ -1010,6 +1027,8 @@ STimeRangeClipToTimeRange(
         }
 
         /* update accordingly */
+        STimeRange  *CLIPTHIS = (STimeRange*)outRange;
+        
         if ( isStartSet ) {
             CLIPTHIS->options |= kSTimeRangeHasLowerBound;
             CLIPTHIS->start = start;
@@ -1024,15 +1043,12 @@ STimeRangeClipToTimeRange(
             CLIPTHIS->options &= ~kSTimeRangeHasUpperBound;
             CLIPTHIS->end = 0;
         }
-        /* invalidate the cached string form: */
-        free((void*)CLIPTHIS->cstr);
-        CLIPTHIS->cstr = NULL;
-        return true;
     }
-    return false;
+    
+    return outRange;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeLeading(
@@ -1077,7 +1093,7 @@ STimeRangeLeading(
     return NULL;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeLeadingBeforeTime(
@@ -1099,7 +1115,7 @@ STimeRangeLeadingBeforeTime(
     return NULL;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeTrailing(
@@ -1144,7 +1160,7 @@ STimeRangeTrailing(
     return NULL;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeTrailingAfterTime(
@@ -1166,7 +1182,7 @@ STimeRangeTrailingAfterTime(
     return NULL;
 }
 
-/**/
+//
 
 unsigned int
 STimeRangeGetCountOfPeriodsOfLength(
@@ -1197,7 +1213,7 @@ STimeRangeGetCountOfPeriodsOfLength(
     return 0;
 }
 
-/**/
+//
 
 STimeRangeRef
 STimeRangeGetPeriodOfLengthAtIndex(
@@ -1209,7 +1225,7 @@ STimeRangeGetPeriodOfLengthAtIndex(
     time_t          dt = duration * index;
 
     if ( ! (aTimeRange->options & kSTimeRangeIsValid) ) return NULL;
-    
+
     //
     // If the range is unbounded at the start, then we allocate periods from the end:
     //
@@ -1252,7 +1268,7 @@ STimeRangeGetPeriodOfLengthAtIndex(
     return NULL;
 }
 
-/**/
+//
 
 #ifdef STIMERANGE_UNIT_TEST
 
@@ -1261,27 +1277,27 @@ main()
 {
     STimeRangeRef   t1, t2, t3, t4, t5, t6, t7, r1, r2, r3, r4;
     time_t          t = time(NULL), tprime;
-    
+
     printf("Origin %s\n", ctime(&t));
-    
+
     tprime = STimeRangeJustifyTime(t, kSTimeRangeJustifyTimeToMinutes, false);
     printf("%lld %lld = %s\n", t, tprime, ctime(&tprime));
-    
+
     tprime = STimeRangeJustifyTime(t, kSTimeRangeJustifyTimeToHours, false);
     printf("%lld %lld = %s\n", t, tprime, ctime(&tprime));
-    
+
     tprime = STimeRangeJustifyTime(t, kSTimeRangeJustifyTimeToDays, false);
     printf("%lld %lld = %s\n", t, tprime, ctime(&tprime));
-    
+
     tprime = STimeRangeJustifyTime(t, kSTimeRangeJustifyTimeToMinutes, true);
     printf("%lld %lld = %s\n", t, tprime, ctime(&tprime));
-    
+
     tprime = STimeRangeJustifyTime(t, kSTimeRangeJustifyTimeToHours, true);
     printf("%lld %lld = %s\n", t, tprime, ctime(&tprime));
-    
+
     tprime = STimeRangeJustifyTime(t, kSTimeRangeJustifyTimeToDays, true);
     printf("%lld %lld = %s\n", t, tprime, ctime(&tprime));
-    
+
     return 0;
 
     t1 = STimeRangeCreate(0, 172799);
