@@ -9,18 +9,34 @@
 #include <getopt.h>
 #include <stdarg.h>
 
-
+/*!
+ * @defined DTRMGR_DEFAULT_DURATION
+ *
+ * Default duration (in seconds) of blocks of time being added to the schedule.
+ */
 #ifndef DTRMGR_DEFAULT_DURATION
 #define DTRMGR_DEFAULT_DURATION     (12 * 60 * 60)
 #endif
-const int dtrmgr_default_duration = DTRMGR_DEFAULT_DURATION;
+const int dtrmgrDefaultDuration = DTRMGR_DEFAULT_DURATION;
 
+/*!
+ * @defined DTRMGR_DEFAULT_JUSTIFY
+ *
+ * Default justification of the before time when looking for blocks of time
+ * to schedule.  Adapts based on the duration chosen.
+ */
 #ifndef DTRMGR_DEFAULT_JUSTIFY
 #define DTRMGR_DEFAULT_JUSTIFY      kSTimeRangeJustifyTimeToHours
 #endif
-const STimeRangeJustifyTimeTo dtrmgr_default_justify = DTRMGR_DEFAULT_JUSTIFY;
+const STimeRangeJustifyTimeTo dtrmgrDefaultJustify = DTRMGR_DEFAULT_JUSTIFY;
 
-
+/*!
+ * @function dtrmgrUnitMultiplier
+ *
+ * Compare unitStr against a NULL-terminated series of string pointers and
+ * return matchValue if any are a full match to unitStr (caseless comparison).
+ * Otherwise return noMatchValue.
+ */
 time_t
 dtrmgrUnitMultiplier(
     const char  *unitStr,
@@ -98,12 +114,17 @@ usage(
             "  <range> :: {<YYYY><MM><DD>T<HH><MM><SS><±HHMM>}:{<YYYY><MM><DD>T<HH><MM><SS><±HHMM>}\n"
             "\n",
             exe,
-            dtrmgr_default_duration
+            dtrmgrDefaultDuration
         );
 }
 
-//
-
+/*!
+ * @function fgetline
+ *
+ * Read a single <NL>-terminated line of characters from fptr and return
+ * a pointer to a buffer owned by this function that contains the line as a
+ * C string (sans <NL>).
+ */
 const char*
 fgetline(
     FILE    *fptr,
@@ -147,9 +168,9 @@ main(
     SScheduleRef                theSchedule = NULL;
     const char                  *theScheduleDBFile = NULL;
     bool                        shouldQuickLoad = true;
-    time_t                      duration = (time_t)dtrmgr_default_duration;
+    time_t                      duration = (time_t)dtrmgrDefaultDuration;
     time_t                      beforeTime = time(NULL);
-    STimeRangeJustifyTimeTo     justify = dtrmgr_default_justify;
+    STimeRangeJustifyTimeTo     justify = dtrmgrDefaultJustify;
     int                         optc;
     
     while ( (optc = getopt_long(argc, argv, cliOptionsStr, cliOptions, NULL)) != -1 ) {
