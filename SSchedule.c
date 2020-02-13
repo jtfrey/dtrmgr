@@ -213,7 +213,7 @@ SScheduleCreateWithFileQuick(
             if ( rc == SQLITE_ROW ) {
                 colVal = sqlite3_column_text(sqlQuery, 0);
                 if ( colVal && *colVal ) {
-                    period = STimeRangeCreateWithString(colVal, NULL);
+                    period = STimeRangeCreateWithString((const char*)colVal, NULL);
                     if ( ! period || ! STimeRangeIsValid(period) ) {
                         if ( period ) STimeRangeRelease(period);
                         period = NULL;
@@ -237,7 +237,7 @@ SScheduleCreateWithFileQuick(
                         
                         colVal = sqlite3_column_text(sqlQuery, 0);
                         if ( colVal && *colVal ) {
-                            STimeRangeRef   blockPeriod = STimeRangeCreateWithString(colVal, NULL);
+                            STimeRangeRef   blockPeriod = STimeRangeCreateWithString((const char*)colVal, NULL);
                             if ( blockPeriod && STimeRangeIsValid(blockPeriod) ) {
                                 newBlock = SScheduleBlockAlloc();
                                 if ( newBlock ) {
@@ -335,7 +335,7 @@ SScheduleCreateWithFile(
             if ( rc == SQLITE_ROW ) {
                 colVal = sqlite3_column_text(sqlQuery, 0);
                 if ( colVal && *colVal ) {
-                    period = STimeRangeCreateWithString(colVal, NULL);
+                    period = STimeRangeCreateWithString((const char*)colVal, NULL);
                     if ( ! period || ! STimeRangeIsValid(period) ) {
                         if ( period ) STimeRangeRelease(period);
                         period = NULL;
@@ -361,7 +361,7 @@ SScheduleCreateWithFile(
                         while ( (rc = sqlite3_step(sqlQuery)) == SQLITE_ROW ) {
                             colVal = sqlite3_column_text(sqlQuery, 0);
                             if ( colVal && *colVal ) {
-                                STimeRangeRef   blockPeriod = STimeRangeCreateWithString(colVal, NULL);
+                                STimeRangeRef   blockPeriod = STimeRangeCreateWithString((const char*)colVal, NULL);
                                 if ( blockPeriod && STimeRangeIsValid(blockPeriod) ) {
                                     rc = SScheduleAddScheduledBlock(newSchedule, blockPeriod) ? SQLITE_OK : SQLITE_NOMEM;
                                     STimeRangeRelease(blockPeriod);
